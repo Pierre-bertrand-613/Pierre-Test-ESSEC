@@ -1,6 +1,6 @@
 # OOP & Design Patterns in Python - exercices
 
-Exercices du cours *Object Oriented Programming & Design pattern in Python* (Benjamin Dallard, CentraleSupélec), ressources sur https://courses.dallard.tech/.
+Exercices du cours *Object Oriented Programming & Design pattern in Python* (Benjamin Dallard, ESSEC - AIDAMS), ressources sur https://courses.dallard.tech/.
 
 | # | Dossier | Exercice | Slide |
 |---|---|---|---|
