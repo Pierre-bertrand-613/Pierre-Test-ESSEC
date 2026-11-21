@@ -1,8 +1,8 @@
 # Exo 1 - Hospital Management System 🏥
 
-Énoncé : https://gist.github.com/bdallard/2d2407c4de4c182afca6d3ec7235e9eb (slide 68). Implémentation : [`hospital.py`](hospital.py).
+Exercise: https://gist.github.com/bdallard/2d2407c4de4c182afca6d3ec7235e9eb (slide 68). Code: [`hospital.py`](hospital.py).
 
-## Task 1 : diagramme de classes de base
+## Task 1 - basic class diagram
 
 ```mermaid
 classDiagram
@@ -36,14 +36,14 @@ classDiagram
     Doctor "1" -- "0..*" Patient : treats
 ```
 
-## Task 2 + 3 : diagramme de classes complet
+## Task 2 + 3 - full class diagram
 
-Choix de modélisation :
-- `User` est une **superclasse abstraite** (id, name, password, login/logout). `Patient`, `Doctor` et `Organizer` en héritent.
-- `Payment` est **abstraite**, et le mode de paiement est modélisé par **polymorphisme** (pattern **Strategy**) : `CheckPayment`, `CashPayment` et `CreditCardPayment` redéfinissent `process()`.
-- **Composition** `HealthProblem *-- Prescription` : une prescription n'existe pas sans le problème qu'elle résout.
-- **Agrégation** `Patient o-- HealthProblem` : l'historique du patient regroupe ses problèmes.
-- `ProblemStatus` est une énumération (PENDING, IN_REVIEW, RESOLVED) ; chaque objet a un timestamp.
+My choices:
+- `User` is an abstract superclass (id, name, password, login/logout), Patient, Doctor and Organizer inherit from it
+- `Payment` is abstract and each payment type overrides `process()` (polymorphism, it's the Strategy pattern)
+- composition `HealthProblem *-- Prescription`: a prescription doesn't exist without its problem
+- aggregation `Patient o-- HealthProblem`: the patient keeps a history of his problems
+- `ProblemStatus` is an enum (PENDING, IN_REVIEW, RESOLVED), and I added timestamps
 
 ```mermaid
 classDiagram
@@ -131,7 +131,7 @@ classDiagram
     Organizer "1" -- "0..*" Payment : forwards
 ```
 
-## Task 2 : séquence « un patient soumet un problème, reçoit une prescription et paie »
+## Task 2 - sequence: a patient submits a problem, gets a prescription and pays
 
 ```mermaid
 sequenceDiagram
@@ -154,9 +154,9 @@ sequenceDiagram
     S-->>P: problem RESOLVED
 ```
 
-## Task 3 : diagrammes de séquence système
+## Task 3 - system sequence diagrams
 
-### 1. Inscription d'un patient (l'Organizer crée un membre)
+### 1. Patient registration (organizer creates a new member)
 
 ```mermaid
 sequenceDiagram
@@ -171,7 +171,7 @@ sequenceDiagram
     O-->>O: send id + password to the new member
 ```
 
-### 2. Consultation : de la soumission du problème à la livraison de la prescription
+### 2. Consultation flow (problem -> prescription delivered)
 
 ```mermaid
 sequenceDiagram
@@ -190,7 +190,7 @@ sequenceDiagram
     S-->>P: Prescription
 ```
 
-### 3. Paiement : le patient paie, l'Organizer reverse au Doctor
+### 3. Payment processing (patient pays, organizer forwards to doctor)
 
 ```mermaid
 sequenceDiagram
@@ -215,7 +215,7 @@ sequenceDiagram
 
 ## Questions
 
-1. **Un patient qui consulte plusieurs médecins ?** Chaque `HealthProblem` est assigné à un `Doctor` (0..1). Un patient qui a plusieurs problèmes peut donc avoir plusieurs médecins. Pour plusieurs médecins sur *un même* problème, on ajoute une classe d'association `Consultation` (problem, doctor, date, avis), avec une multiplicité `1..*` côté docteur.
-2. **Des prescriptions réutilisables ?** Une prescription reste liée au problème qui l'a créée (composition), mais elle référence la précédente (`previous`) : on garde l'historique et un renouvellement crée une nouvelle prescription qui pointe vers l'ancienne. Pour de vraies prescriptions-types, on séparerait `PrescriptionTemplate` (réutilisable) et `Prescription` (instance datée pour un patient).
-3. **Quel pattern pour le paiement ?** **Strategy** : chaque mode de paiement est une classe interchangeable qui implémente `process()`. On peut y ajouter une **Factory** pour créer la bonne stratégie à partir de `"check"`, `"cash"` ou `"card"`.
-4. **Intégrité des paiements ?** Transactions atomiques en base (le paiement et le reversement réussissent ou échouent ensemble), clé d'idempotence pour ne pas payer deux fois, un flag `forwarded` qui empêche de reverser deux fois, un journal d'audit horodaté, et la validation du montant par rapport au `fee` de la prescription.
+1. **Patient consulting multiple doctors?** Each HealthProblem is assigned to one doctor, so a patient with several problems can see several doctors. If we want several doctors on the same problem, we could add a `Consultation` class between HealthProblem and Doctor (with `1..*` on the doctor side).
+2. **Reusable prescriptions?** A prescription stays linked to its problem but it has a reference to the previous one (`previous`), so we keep the history and a renewal is just a new prescription pointing to the old one. For real reusable ones we could have a `PrescriptionTemplate` class.
+3. **Design pattern for the payment?** Strategy: each payment type is a class with its own `process()`. We could also use a Factory to create the right one from "check" / "cash" / "card".
+4. **Data integrity for payments?** Use database transactions (payment + forwarding succeed or fail together), check the amount matches the prescription fee, and have a `forwarded` flag so a payment can't be forwarded twice. Keeping a log with timestamps also helps.

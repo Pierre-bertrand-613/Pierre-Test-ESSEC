@@ -1,18 +1,15 @@
 # 06 - Testing & mocking
 
-Slide 93 et https://courses.dallard.tech/ci_cd/testing_python_intro/#mocking
+Slide 93 + https://courses.dallard.tech/ci_cd/testing_python_intro/#mocking
 
-| Fichier | Contenu |
-|---|---|
-| `groq_chat.py` | `ask_groq()`, l'exemple du cours |
-| `test_groq_chat.py` | Tests unitaires avec `mocker` : faux client, vérification de la requête envoyée, simulation d'une panne de l'API, question vide, `mocker.patch` |
-| `app.py` | L'API FastAPI de la slide 93, corrigée (`import os` manquant, client injecté via `Depends`, modèle mixtral retiré par Groq) |
-| `test_app.py` | Tests d'intégration avec `TestClient` + `app.dependency_overrides` : `/status`, `/chat`, body invalide (422), et chaque erreur Groq transformée en code HTTP (500 / 429 / 503) |
+- `groq_chat.py`: the `ask_groq()` function from the course
+- `test_groq_chat.py`: unit tests with `mocker` (fake client, check the request we send, simulate the API being down, empty question)
+- `app.py`: the FastAPI app from slide 93. I had to fix a few things: `import os` was missing, the mixtral model doesn't exist anymore on Groq, and I create the client with `Depends` so I can replace it in the tests
+- `test_app.py`: tests of the API with `TestClient` (/status, /chat, and each Groq error -> 500 / 429 / 503)
 
 ```bash
-python3 -m pytest      # aucun appel réel à l'API, aucune clé nécessaire
+python3 -m pytest   # no real API call, no key needed
 ```
 
-> Règle du mocking : on mocke ce qu'on ne possède pas (l'API Groq) et on teste ce qu'on possède (validation, requête envoyée, gestion d'erreurs).
->
-> La clé API se met dans une variable d'environnement (`export GROQ_API_KEY=...`) ou dans un fichier `.env` ignoré par Git, **jamais dans le repo public**.
+Rule from the course: mock what you don't own (the API), test what you own (validation, error handling).
+The API key goes in an environment variable (`GROQ_API_KEY`), never in the repo.

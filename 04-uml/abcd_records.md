@@ -1,12 +1,12 @@
 # Exo 2 - ABCD Records 📼
 
-Énoncé : https://gist.github.com/bdallard/2d2407c4de4c182afca6d3ec7235e9eb (slide 68). Implémentation : [`abcd_records.py`](abcd_records.py).
+Exercise: https://gist.github.com/bdallard/2d2407c4de4c182afca6d3ec7235e9eb (slide 68). Code: [`abcd_records.py`](abcd_records.py).
 
-> Mermaid n'a pas de vrai diagramme de cas d'utilisation. Les cas d'utilisation sont donc représentés par des ovales dans un *flowchart*, le rectangle `ABCD Records System` joue le rôle de frontière du système, et les flèches en pointillés sont étiquetées `<<include>>` / `<<extend>>`.
+> Mermaid doesn't have real use case diagrams, so I used a flowchart: use cases are ovals, the `ABCD Records System` box is the system boundary and the dotted arrows are `<<include>>` / `<<extend>>`.
 
 ## Level 1
 
-### Task 1.1 : cas d'utilisation simples
+### Task 1.1 - simple use case diagram
 
 ```mermaid
 flowchart LR
@@ -24,7 +24,7 @@ flowchart LR
     C --- PR
 ```
 
-### Task 1.2 : classes de base
+### Task 1.2 - basic class diagram
 
 ```mermaid
 classDiagram
@@ -56,10 +56,10 @@ classDiagram
 
 ## Level 2
 
-### Task 2.1 : cas d'utilisation complets
+### Task 2.1 - full use case diagram
 
-- `<<include>>` (obligatoire, toujours exécuté) : *Place Order* inclut *Verify Membership* et *Verify Item Availability*. *Process Order* inclut *Print Invoice* et *Print Shipping List*.
-- `<<extend>>` (optionnel, sous condition) : *Apply Discount* et *Order Unavailable Items* étendent *Place Order*, seulement pour les membres Royal. *Send Membership Application* étend *Verify Membership* quand le client n'est pas membre.
+- `<<include>>` (always happens): Place Order includes Verify Membership and Verify Item Availability, Process Order includes Print Invoice and Print Shipping List
+- `<<extend>>` (only sometimes): Apply Discount and Order Unavailable Items extend Place Order (only for Royal members), Send Membership Application extends Verify Membership (when the customer is not a member)
 
 ```mermaid
 flowchart LR
@@ -99,7 +99,7 @@ flowchart LR
     SA -. "&lt;&lt;extend&gt;&gt;" .-> VM
 ```
 
-### Task 2.2 : classes complètes
+### Task 2.2 - full class diagram
 
 ```mermaid
 classDiagram
@@ -212,18 +212,18 @@ classDiagram
     DailyRecordsFile "1" o-- "0..*" Order : records
 ```
 
-#### Scénario : un membre Royal commande 2 CD (dont un indisponible) et paie par chèque
+#### Scenario: a Royal member orders 2 CDs (one unavailable) and pays by check
 
-1. `RoyalMember.place_order()` crée un `Order` avec 2 `OrderLine` (CD A en stock, CD B en rupture).
-2. Le clerk vérifie l'adhésion (OK) puis la disponibilité. CD B est indisponible, mais `can_order_unavailable()` renvoie `True`, donc la ligne est marquée `backordered`.
-3. La remise Royal de 10 % est appliquée. L'`Invoice` reprend le total, la `ShippingList` ne contient que le CD A.
-4. Le `Collection Dept Clerk` encaisse un `Check` et la commande est enregistrée dans le `DailyRecordsFile`.
+1. `RoyalMember.place_order()` creates an Order with 2 OrderLines (CD A in stock, CD B out of stock)
+2. The clerk checks the membership (ok) and the availability. CD B is not available but Royal members can order it anyway, so the line is `backordered`
+3. The 10% Royal discount is applied, the Invoice has the total and the ShippingList only has CD A
+4. The collection clerk takes the Check and the order is saved in the DailyRecordsFile
 
-Ce scénario est exécuté dans `abcd_records.py` (bloc `__main__`).
+This scenario runs in the `__main__` of `abcd_records.py`.
 
-## Level 3 : diagrammes de séquence
+## Level 3 - sequence diagrams
 
-### 1. Traitement complet d'une commande
+### 1. Complete order processing
 
 ```mermaid
 sequenceDiagram
@@ -250,7 +250,7 @@ sequenceDiagram
     CC-->>M: receipt
 ```
 
-### 2. Vérification de l'adhésion (succès et échec)
+### 2. Membership verification (success and failure)
 
 ```mermaid
 sequenceDiagram
@@ -269,7 +269,7 @@ sequenceDiagram
     end
 ```
 
-### 3. Paiement (tous types)
+### 3. Payment processing (all types)
 
 ```mermaid
 sequenceDiagram
@@ -290,7 +290,7 @@ sequenceDiagram
     CC-->>M: receipt
 ```
 
-### 4. Réapprovisionnement pour les membres Royal
+### 4. Item reordering for Royal members
 
 ```mermaid
 sequenceDiagram
