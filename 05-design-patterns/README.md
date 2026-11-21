@@ -1,30 +1,30 @@
 # 05 - Design patterns
 
-Exercices du site du cours :
+Exercises from the course website:
 - [Creational patterns](https://courses.dallard.tech/sys_design/creational_pattern/)
 - Structural patterns
 - Behavioral patterns
 
-Chaque fichier commence par la liste des problèmes du code « spaghetti » (step 1). Le code refactorisé suit, puis l'usage attendu dans `__main__`.
+For each one I wrote the problems of the spaghetti code at the top of the file, then the refactored code, and the expected usage in `__main__`.
 
-| Famille | Pattern | Exercice | Fichier |
+| Type | Pattern | Exercise | File |
 |---|---|---|---|
-| Créationnel | Factory | Payment system | [`creational/factory_payment.py`](creational/factory_payment.py) |
-| Créationnel | Builder | HR Employee onboarding | [`creational/builder_employee.py`](creational/builder_employee.py) |
-| Créationnel | Singleton | Configuration manager | [`creational/singleton_config.py`](creational/singleton_config.py) |
-| Structurel | Adapter | XML → JSON reporting | [`structural/adapter_report.py`](structural/adapter_report.py) |
-| Structurel | Decorator | Order pricing | [`structural/decorator_order.py`](structural/decorator_order.py) |
-| Comportemental | Strategy | Multi-format reports | [`behavioral/strategy_report.py`](behavioral/strategy_report.py) |
-| Comportemental | Template Method | ETL pipelines | [`behavioral/template_etl.py`](behavioral/template_etl.py) |
+| Creational | Factory | Payment system | [`creational/factory_payment.py`](creational/factory_payment.py) |
+| Creational | Builder | HR employee onboarding | [`creational/builder_employee.py`](creational/builder_employee.py) |
+| Creational | Singleton | Config manager | [`creational/singleton_config.py`](creational/singleton_config.py) |
+| Structural | Adapter | XML -> JSON reports | [`structural/adapter_report.py`](structural/adapter_report.py) |
+| Structural | Decorator | Order pricing | [`structural/decorator_order.py`](structural/decorator_order.py) |
+| Behavioral | Strategy | Report formats | [`behavioral/strategy_report.py`](behavioral/strategy_report.py) |
+| Behavioral | Template Method | ETL pipelines | [`behavioral/template_etl.py`](behavioral/template_etl.py) |
 
 ```bash
-python3 creational/factory_payment.py      # etc.
-python3 -m pytest                          # 13 tests
+python3 creational/factory_payment.py
+python3 -m pytest
 ```
 
-## Factory : système de paiement
+## Factory - payment system
 
-**Problème :** une chaîne `if/elif` sur `payment_type`, qui viole Open/Closed. **Solution :** une classe par processeur, et une factory qui associe une chaîne à une classe grâce à un dictionnaire. `ApplePayProcessor` est ajouté avec `register()` sans modifier aucune classe existante.
+Problem: a big if/elif on `payment_type`, so adding a payment method means modifying the function (breaks Open/Closed). Solution: one class per processor and a factory with a dict that maps the string to the class. I added Apple Pay with `register()` without changing the other classes.
 
 ```mermaid
 classDiagram
@@ -50,9 +50,9 @@ classDiagram
     PaymentFactory ..> PaymentProcessor : creates
 ```
 
-## Builder : onboarding RH
+## Builder - HR onboarding
 
-**Problème :** un constructeur à 17 paramètres (telescoping constructor) et des booléens illisibles. **Solution :** des méthodes chaînables qui renvoient `self`, la validation regroupée dans `build()`, et des presets (`DeveloperBuilder`, `InternBuilder`).
+Problem: a function with 17 parameters and a lot of True/False that you can't read. Solution: chainable methods that return `self`, all the validation in `build()`, and presets (`DeveloperBuilder`, `InternBuilder`).
 
 ```mermaid
 classDiagram
@@ -85,9 +85,9 @@ classDiagram
     EmployeeBuilder ..> Employee : builds
 ```
 
-## Singleton : gestionnaire de configuration
+## Singleton - config manager
 
-**Problème :** `config.json` est relu 4 fois, il n'y a pas d'état partagé et le code est difficile à mocker. **Solution :** `get_instance()` charge le fichier une seule fois. `get("database.host")` permet de lire les clés imbriquées, et `reset()` sert dans les tests.
+Problem: config.json is read 4 times and every module has its own copy. Solution: `get_instance()` loads the file only once, `get("database.host")` reads nested keys, and `reset()` is for the tests.
 
 ```mermaid
 classDiagram
@@ -102,9 +102,9 @@ classDiagram
     ConfigManager --> ConfigManager : _instance
 ```
 
-## Adapter : rapports XML vers JSON
+## Adapter - XML to JSON reports
 
-**Problème :** le générateur legacy (non modifiable) produit du XML, alors que le dashboard attend du JSON. **Solution :** `LegacyReportAdapter` implémente l'interface attendue et *enveloppe* le legacy (composition) pour convertir le XML en JSON.
+Problem: the legacy generator (that we can't modify) returns XML but the dashboard wants JSON. Solution: `LegacyReportAdapter` implements the interface the dashboard expects, wraps the legacy object and converts XML to JSON.
 
 ```mermaid
 classDiagram
@@ -127,9 +127,9 @@ classDiagram
     AnalyticsDashboard ..> ReportGeneratorInterface : uses JSON from
 ```
 
-## Decorator : calcul du prix d'une commande
+## Decorator - order pricing
 
-**Problème :** 5 flags booléens dans une seule méthode, et un ordre des opérations implicite. **Solution :** chaque option est un décorateur qui enveloppe un `OrderComponent`. L'ordre d'empilement *est* l'ordre de calcul.
+Problem: 5 boolean flags in one method and the order of the operations is not clear. Solution: each option is a decorator that wraps an `OrderComponent`, and the order you wrap them is the order of the calculation.
 
 ```mermaid
 classDiagram
@@ -162,9 +162,9 @@ classDiagram
     DiscountDecorator <|-- PremiumMemberDecorator
 ```
 
-## Strategy : rapports multi-formats
+## Strategy - report formats
 
-**Problème :** deux chaînes `if/elif` (generate et save), on ne peut pas changer de format à l'exécution et le code est peu testable. **Solution :** une stratégie par format, et un contexte `ReportGenerator` avec `set_strategy()`. Le format HTML a été ajouté sans toucher au code existant, ce qui prouve que la conception est extensible.
+Problem: two if/elif chains (generate and save), you can't switch format at runtime and it's hard to test. Solution: one strategy class per format and a `ReportGenerator` with `set_strategy()`. I added HTML at the end without touching the other classes.
 
 ```mermaid
 classDiagram
@@ -193,9 +193,9 @@ classDiagram
     ReportGenerator o--> "1" FormatStrategy
 ```
 
-## Template Method : pipelines ETL
+## Template Method - ETL pipelines
 
-**Problème :** connexion, validation, chargement et nettoyage sont copiés-collés dans 3 classes. **Solution :** `run()` (la *template method*) fixe le workflow une seule fois. Les sous-classes implémentent seulement `extract()` et `transform()`, et peuvent redéfinir les hooks `before_run()` et `after_run()`. Le pipeline XML valide la conception.
+Problem: connect, validate, load and cleanup are copy-pasted in the 3 classes. Solution: `run()` is the template method that defines the steps once, subclasses only write `extract()` and `transform()` and can override the hooks `before_run()` / `after_run()`. I added the XML pipeline to check it works.
 
 ```mermaid
 classDiagram
