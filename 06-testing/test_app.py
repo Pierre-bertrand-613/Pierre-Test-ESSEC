@@ -10,11 +10,8 @@ REQUEST = httpx.Request("POST", "https://api.groq.com/openai/v1/chat/completions
 
 
 @pytest.fixture
-def fake_client(mocker):
-    mock_choice = mocker.Mock()
-    mock_choice.message.content = "Paris"
-    mock_client = mocker.Mock()
-    mock_client.chat.completions.create.return_value = mocker.Mock(choices=[mock_choice])
+def fake_client(make_fake_client):
+    mock_client = make_fake_client("Paris")
     app.dependency_overrides[get_client] = lambda: mock_client
     yield mock_client
     app.dependency_overrides.clear()

@@ -8,23 +8,12 @@ import pytest
 from groq_chat import MODEL, ask_groq
 
 
-def make_fake_client(mocker, answer: str = "4"):
-    """Fake client with the same shape as the real response."""
-    mock_choice = mocker.Mock()
-    mock_choice.message.content = answer
-    mock_response = mocker.Mock()
-    mock_response.choices = [mock_choice]
-    mock_client = mocker.Mock()
-    mock_client.chat.completions.create.return_value = mock_response
-    return mock_client
+def test_ask_groq(make_fake_client):
+    assert ask_groq("What is 2+2?", client=make_fake_client()) == "4"
 
 
-def test_ask_groq(mocker):
-    assert ask_groq("What is 2+2?", client=make_fake_client(mocker)) == "4"
-
-
-def test_ask_groq_calls_api_correctly(mocker):
-    client = make_fake_client(mocker)
+def test_ask_groq_calls_api_correctly(make_fake_client):
+    client = make_fake_client()
     ask_groq("What is 2+2?", client=client)
     client.chat.completions.create.assert_called_once_with(
         model=MODEL,
@@ -41,15 +30,15 @@ def test_ask_groq_raises_error_when_api_fails(mocker):
 
 
 @pytest.mark.parametrize("question", ["", "   ", "\n"])
-def test_empty_question_never_calls_the_api(mocker, question):
-    client = make_fake_client(mocker)
+def test_empty_question_never_calls_the_api(make_fake_client, question):
+    client = make_fake_client()
     with pytest.raises(ValueError):
         ask_groq(question, client=client)
     client.chat.completions.create.assert_not_called()
 
 
-def test_default_client_is_created_when_none_given(mocker):
-    fake = make_fake_client(mocker, "hi")
+def test_default_client_is_created_when_none_given(mocker, make_fake_client):
+    fake = make_fake_client("hi")
     groq_class = mocker.patch("groq_chat.Groq", return_value=fake)   # patch where it is used
     assert ask_groq("Hello") == "hi"
     groq_class.assert_called_once_with()
